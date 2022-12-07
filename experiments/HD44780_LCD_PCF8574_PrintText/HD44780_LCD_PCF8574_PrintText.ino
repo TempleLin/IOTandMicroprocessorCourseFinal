@@ -52,6 +52,13 @@ void loop() {
   char testString[] = "Hello World";
   myLCD.PCF8574_LCDSendString(testString);
   myLCD.PCF8574_LCDSendChar('!');  // Display a single character
+
+  /*
+  These two lines can let you clear the current text on the screen and
+  write new text.
+  */
+  //myLCD.PCF8574_LCDClearScreen();
+  //myLCD.PCF8574_LCDGOTO(LCDLineNumberOne, 0);
   while (true) {};
 }
 
