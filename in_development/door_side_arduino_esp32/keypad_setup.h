@@ -17,8 +17,6 @@ private:
   byte* rowPins;
   byte* colPins;
 public:
-
-
   KeypadSetup(byte* rowPins, byte* colPins) {
     this->rowPins = rowPins;
     this->colPins = colPins;
