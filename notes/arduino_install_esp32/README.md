@@ -9,3 +9,11 @@
 ![screenshot 1](./Screenshot_4.png)
 ![screenshot 1](./Screenshot_5.png)
 ![screenshot 1](./Screenshot_6.png)
+
+Note:
+
+    If you encountered this error while uploading to ESP32 through Arduino IDE:
+
+        "A fatal error occurred: Failed to connect to ESP32: Wrong boot mode detected (0x13)!"
+
+    You can fix by: Just press BOOT button on the board while uploading.
