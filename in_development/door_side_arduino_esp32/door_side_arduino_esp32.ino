@@ -1,31 +1,46 @@
 #include <Keypad.h>
-#include "keypad_setup.h"
+#include "keypad_control.h"
+#include "stack.h"
 
-long previousMillis = 0; // Milliseconds for counting timer.
+#define USER_KEY_INPUTS_MAX 5
 
-// Connect keypad ROW0, ROW1, ROW2 and ROW3 to these Arduino pins.
-byte rowPins[ROWS] = {9, 8, 7, 6};
-
-// Connect keypad COL0, COL1 and COL2, COL3 to these Arduino pins.
-byte colPins[COLS] = {5, 4, 3, 2};
-
-KeypadSetup keypadSetup(rowPins, colPins);
+const byte rowPins[] {9, 8, 7, 6};
+const byte colPins[] {5, 4, 3, 2};
 
 // Create the Keypad
-Keypad keypad = Keypad(makeKeymap(keys), keypadSetup.getRowPins(), keypadSetup.getColPins(), ROWS, COLS);
+Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
+
+Stack userInputs{};
 
 void setup() {
   Serial.begin(9600);
+  userInputs.top = nullptr;
+  userInputs.length = 0;
 }
 
 void loop() {
+  static long previousMillis = 0; // Milliseconds for counting timer.
   unsigned long currentMillis = millis();
 
   char key = keypad.getKey();
 
   if (key != NO_KEY) {
-    Serial.println(key);
     previousMillis = currentMillis; // Reset timer if key input happens.
+    Serial.print("User input appending: ");
+    Serial.println(key);
+
+    Push(&userInputs, key);
+
+    Serial.print("Length: ");
+    Serial.println(Length(&userInputs));
+
+    if (Length(&userInputs) == USER_KEY_INPUTS_MAX) {
+      Serial.println("Keypad input reached max. Clearing.");
+      Clear(&userInputs);
+    }
+    if (!IsEmpty(&userInputs)) {
+            
+    } 
   } else {
     if (currentMillis - previousMillis >= TIMER_MILLISECS) {
       previousMillis = currentMillis;
@@ -35,5 +50,6 @@ void loop() {
 }
 
 void onIdleTimerReached() {
-  Serial.print("Idle reached.\n");
+  Serial.println("Idle reached. Clearing");
+  Clear(&userInputs);
 }
