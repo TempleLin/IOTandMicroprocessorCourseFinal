@@ -1,8 +1,6 @@
 #ifndef WIFI_CTRL
 #define WIFI_CTRL
 
-#ifdef USE_NETWORKING
-
 #include "WiFiType.h"
 
 // From WIFI library: https://www.arduino.cc/reference/en/libraries/wifi/
@@ -99,7 +97,5 @@ void printWifiStatus() {
   Serial.print(rssi);
   Serial.println(" dBm");
 }
-
-#endif
 
 #endif

@@ -1,20 +1,40 @@
-#include <Keypad.h>
-#include "keypad_config_data.h"
-#include "networking_control.h"
-#include "stack.h"
-
-#define USER_KEY_INPUTS_MAX 5
+/*
+Comment this if the MCU used is Arduino instead of ESP32.
+*/
+#define USING_ESP32
 
 /*
 Make sure to comment out the macros if its relevant functionality is not setup hardware-wise.
 */
-// #define USE_NETWORKING
+#ifdef USING_ESP32
+  #define USE_NETWORKING
+#endif
 #define USE_KEYPAD 
+
+#include <Keypad.h>
+#include "keypad_config_data.h"
+
+#ifdef USE_NETWORKING
+#include "networking_control.h"
+#endif
+
+#include "stack.h"
+
+#define USER_KEY_INPUTS_MAX 5
+
 
 const static bool NETWORKING_SERIAL = true;
 
+#ifdef USING_ESP32 
+/*
+Be aware: GPIO 34~39 in ESP32 are INPUT ONLY. Therefore, they cannot be used to connect to keypad.
+*/
+const byte rowPins[] {32, 33, 25, 26};
+const byte colPins[] {27, 14, 12, 13};
+#else // Arduino
 const byte rowPins[] {9, 8, 7, 6};
 const byte colPins[] {5, 4, 3, 2};
+#endif
 
 const char keypadRegisterPassword[] = {'A', '1', '2', '3', '4'}; // userInputs data must match this array in order to register new user(RFID) to database.
 
@@ -31,7 +51,7 @@ const char* server = "www.google.com";
 
 void setup() {
   Serial.begin(9600);
-  Serial.println("Setup.");
+  Serial.println("Setup.");  
 
 #ifdef USE_KEYPAD
   userInputs.top = nullptr;
@@ -65,7 +85,7 @@ void loop() {
 
     if (Length(&userInputs) == USER_KEY_INPUTS_MAX) {
       Serial.println("Keypad input reached max.");
-      if (EqualsArr(&userInputs, keypadRegisterPassword, sizeof(keypadRegisterPassword) * sizeof(char), false)) {
+      if (EqualsArr(&userInputs, const_cast<char*>(keypadRegisterPassword), sizeof(keypadRegisterPassword) * sizeof(char), false)) {
         onKeypadRegisterPasswordMatch();
       } else {
         Clear(&userInputs);
@@ -80,9 +100,12 @@ void loop() {
 #endif
 
 #ifdef USE_NETWORKING
-  while (client->available()) {
-    char c = client->read();
-    Serial.write(c);
+  // while (client->available()) {
+  //   // char c = client->read();
+  //   // Serial.write(c);
+  // }
+  if (client -> available()) {
+    
   }
 
   // if the server's disconnected, stop the client:
