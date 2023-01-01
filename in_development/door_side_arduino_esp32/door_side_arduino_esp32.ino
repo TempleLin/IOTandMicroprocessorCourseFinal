@@ -66,12 +66,11 @@ void loop() {
     if (Length(&userInputs) == USER_KEY_INPUTS_MAX) {
       Serial.println("Keypad input reached max.");
       if (EqualsArr(&userInputs, keypadRegisterPassword, sizeof(keypadRegisterPassword) * sizeof(char), false)) {
-        Serial.println("Keypad register password match.");
+        onKeypadRegisterPasswordMatch();
+      } else {
+        Clear(&userInputs);
       }
     }
-    if (!IsEmpty(&userInputs)) {
-            
-    } 
   } else {
     if (currentMillis - previousMillis >= TIMER_MILLISECS) {
       previousMillis = currentMillis;
@@ -97,6 +96,12 @@ void loop() {
   }
 #endif
 // Serial.println("Loop finish.");
+}
+
+void onKeypadRegisterPasswordMatch() {
+  Serial.println("Keypad register password match.");
+  Serial.print("Length of userInput: ");
+  Serial.println(Length(&userInputs));
 }
 
 void onIdleTimerReached() {
