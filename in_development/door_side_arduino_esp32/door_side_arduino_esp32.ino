@@ -100,13 +100,10 @@ void loop() {
 #endif
 
 #ifdef USE_NETWORKING
-  // while (client->available()) {
+  // while (client->available()) { // If this loop keeps going, keypad won't be able to work.
   //   // char c = client->read();
   //   // Serial.write(c);
   // }
-  if (client -> available()) {
-    
-  }
 
   // if the server's disconnected, stop the client:
   if (!client->connected()) {
