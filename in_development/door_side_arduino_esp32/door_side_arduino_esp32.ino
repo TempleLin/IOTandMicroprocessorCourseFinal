@@ -8,22 +8,26 @@
 /*
 Make sure to comment out the macros if its relevant functionality is not setup hardware-wise.
 */
-#define USE_NETWORKING
-// #define USE_KEYPAD 
+// #define USE_NETWORKING
+#define USE_KEYPAD 
 
 const static bool NETWORKING_SERIAL = true;
 
 const byte rowPins[] {9, 8, 7, 6};
 const byte colPins[] {5, 4, 3, 2};
 
+const char keypadRegisterPassword[] = {'A', '1', '2', '3', '4'}; // userInputs data must match this array in order to register new user(RFID) to database.
+
 // Create the Keypad
 Keypad keypad = Keypad(makeKeymap(keys), const_cast<byte*>(rowPins), const_cast<byte*>(colPins), ROWS, COLS);
 Stack userInputs{}; // Keypad inputs get added to stack.
 
+#ifdef USE_NETWORKING
 WiFiClient* client;
 const char* wifiSSID = "Galaxy A53 5GDC0F";
 const char* wifiPass = "bcvs5702";
 const char* server = "www.google.com";
+#endif
 
 void setup() {
   Serial.begin(9600);
@@ -42,7 +46,7 @@ void setup() {
 }
 
 void loop() {
-  Serial.println("Loop.");
+  // Serial.println("Loop.");
   static long previousMillis = 0; // Milliseconds for counting timer.
   unsigned long currentMillis = millis();
 
@@ -60,8 +64,10 @@ void loop() {
     Serial.println(Length(&userInputs));
 
     if (Length(&userInputs) == USER_KEY_INPUTS_MAX) {
-      Serial.println("Keypad input reached max. Clearing.");
-      Clear(&userInputs);
+      Serial.println("Keypad input reached max.");
+      if (EqualsArr(&userInputs, keypadRegisterPassword, sizeof(keypadRegisterPassword) * sizeof(char), false)) {
+        Serial.println("Keypad register password match.");
+      }
     }
     if (!IsEmpty(&userInputs)) {
             
@@ -90,7 +96,7 @@ void loop() {
     while (true);
   }
 #endif
-Serial.println("Loop finish.");
+// Serial.println("Loop finish.");
 }
 
 void onIdleTimerReached() {

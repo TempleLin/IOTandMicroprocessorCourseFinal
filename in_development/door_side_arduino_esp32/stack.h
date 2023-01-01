@@ -44,4 +44,31 @@ void Clear(Stack* stack) {
 }
 
 int Length(Stack* stack) { return stack->length; }
+
+/**
+  * Test if all data matches given array.
+  */
+bool EqualsArr(Stack* stack, char* arr, int arrSize, bool checkLeftToRight) {
+  if (Length(stack) != arrSize) {
+    return false;
+  }
+  if (checkLeftToRight) {
+    for (int i = 0; i < arrSize; i++) {
+      char top = Top(stack);
+      Pop(stack);
+      if (top != arr[i]) {
+        return false;
+      }
+    }
+  } else {
+    for (int i = arrSize - 1; i >= 0; i--) {
+      char top = Top(stack);
+      Pop(stack);
+      if (top != arr[i]) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
 #endif
