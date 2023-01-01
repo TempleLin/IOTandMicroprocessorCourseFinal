@@ -5,8 +5,13 @@
 
 #define USER_KEY_INPUTS_MAX 5
 
-const static bool USE_NETWORKING = true;
-const static bool USE_KEYPAD = false;
+/*
+Make sure to comment out the macros if its relevant functionality is not setup hardware-wise.
+*/
+#define USE_NETWORKING
+// #define USE_KEYPAD 
+
+const static bool NETWORKING_SERIAL = true;
 
 const byte rowPins[] {9, 8, 7, 6};
 const byte colPins[] {5, 4, 3, 2};
@@ -18,47 +23,74 @@ Stack userInputs{}; // Keypad inputs get added to stack.
 WiFiClient* client;
 const char* wifiSSID = "Galaxy A53 5GDC0F";
 const char* wifiPass = "bcvs5702";
+const char* server = "www.google.com";
 
 void setup() {
   Serial.begin(9600);
+  Serial.println("Setup.");
+
+#ifdef USE_KEYPAD
   userInputs.top = nullptr;
   userInputs.length = 0;
+#endif
 
-  scanNearbyWiFi();
-  connectToWiFi(wifiSSID, wifiPass, USE_NETWORKING);
+#ifdef USE_NETWORKING
+    scanNearbyWiFi();
+    connectToWiFi(wifiSSID, wifiPass, NETWORKING_SERIAL);
+    client = connectToServer(server, NETWORKING_SERIAL);
+#endif
 }
 
 void loop() {
+  Serial.println("Loop.");
   static long previousMillis = 0; // Milliseconds for counting timer.
   unsigned long currentMillis = millis();
 
-  if (USE_KEYPAD) {
-    char key = keypad.getKey();
-  
-    if (key != NO_KEY) {
-      previousMillis = currentMillis; // Reset timer if key input happens.
-      Serial.print("User input appending: ");
-      Serial.println(key);
-  
-      Push(&userInputs, key);
-  
-      Serial.print("Length: ");
-      Serial.println(Length(&userInputs));
-  
-      if (Length(&userInputs) == USER_KEY_INPUTS_MAX) {
-        Serial.println("Keypad input reached max. Clearing.");
-        Clear(&userInputs);
-      }
-      if (!IsEmpty(&userInputs)) {
-              
-      } 
-    } else {
-      if (currentMillis - previousMillis >= TIMER_MILLISECS) {
-        previousMillis = currentMillis;
-        onIdleTimerReached();
-      }        
+#ifdef USE_KEYPAD
+  char key = keypad.getKey();
+
+  if (key != NO_KEY) {
+    previousMillis = currentMillis; // Reset timer if key input happens.
+    Serial.print("User input appending: ");
+    Serial.println(key);
+
+    Push(&userInputs, key);
+
+    Serial.print("Length: ");
+    Serial.println(Length(&userInputs));
+
+    if (Length(&userInputs) == USER_KEY_INPUTS_MAX) {
+      Serial.println("Keypad input reached max. Clearing.");
+      Clear(&userInputs);
     }
+    if (!IsEmpty(&userInputs)) {
+            
+    } 
+  } else {
+    if (currentMillis - previousMillis >= TIMER_MILLISECS) {
+      previousMillis = currentMillis;
+      onIdleTimerReached();
+    }        
   }
+#endif
+
+#ifdef USE_NETWORKING
+  while (client->available()) {
+    char c = client->read();
+    Serial.write(c);
+  }
+
+  // if the server's disconnected, stop the client:
+  if (!client->connected()) {
+    Serial.println();
+    Serial.println("disconnecting from server.");
+    client->stop();
+
+    // do nothing forevermore:
+    while (true);
+  }
+#endif
+Serial.println("Loop finish.");
 }
 
 void onIdleTimerReached() {
