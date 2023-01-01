@@ -11,3 +11,6 @@ Current architecture planning draft:
     好，現在進入下一步。感應完了之後，如果使用者是確定可以使用辦公室的空間，那當然就要開門。可是，如果門不只有一個呢？我覺得這種狀況在開發階段也是需要考量的。這樣的話，我們就應該要把“群組控制”納入考量。意思就是說，應當要有各別門都能控制。我的想法是，控制門的開關可以透過樹莓派去處理，而每一個門都需要有專門的小IC負責去接收資料以及控制鎖的開關。這個時候每個門就可以用一個Raspberry Pi Pico去負責。我們可以透過I2C或SPI，從Raspberry Pi 4B發送資訊到每個Raspberry Pi Pico，進而控制每一道門的開關。
 
 ![Architecture Image](./architecture_ugly_img.jpg)
+
+<h1>UPDATE: Everything above are OUTDATED.</h1>
+<h3>A new architecture is being planned. There will be a center ESP32 used as access point(router) for all other circuits to make communications with each other.</h3>
