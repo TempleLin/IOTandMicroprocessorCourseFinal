@@ -8,9 +8,14 @@ const char *password = "meeting1234";
 
 WiFiServer server(80);
 
-enum class EResponse {
-  SHOW_DOOR_STATUS,
-  REGISTER_USER,
+enum class EResponse {  
+  SHOW_DOOR_STATUS, // From Raspberry Pi 4B.
+  OPEN_DOOR, // From Raspberry Pi 4B.
+  CLOSE_DOOR, // From Raspberry Pi 4B.
+  REGISTER_USER, // From ESP32.
+  GET_REGISTER_USER, // From Raspberry Pi 4B.  
+  LOGIN_USER, // From ESP32.
+  GET_LOGIN_USER, // From Raspberry Pi 4B.  
   TEST_POST,
   NONE
 };
@@ -19,10 +24,10 @@ enum class EResponse {
 Attributes that could change when receiving desired requests.
 */
 EResponse eResponse = EResponse::SHOW_DOOR_STATUS;
-
 bool doorShouldOpen = false;
-
-String extraToWrite = "";
+String extraToPrint = "";
+String userIDToRegister = "";
+String userIDToLogin = "";
 
 void setup() {
   Serial.begin(9600);
@@ -65,11 +70,26 @@ WiFiClient client = server.available();   // listen for incoming clients
             client.println();
 
             switch (eResponse) {
+              case EResponse::OPEN_DOOR:
+                doorShouldOpen = true;
+                break;
+              case EResponse::CLOSE_DOOR:
+                doorShouldOpen = false;
+                break;
               case EResponse::SHOW_DOOR_STATUS:
                 client.print(doorShouldOpen? "Open" : "Close");
                 break;
               case EResponse::REGISTER_USER:
-                client.print("TODO: Implement user registering.");              
+                // client.print("TODO: Implement user registering.");
+                // client.print(userIDToRegister);
+                break;
+              case EResponse::GET_REGISTER_USER:
+                client.print(userIDToRegister == ""? "None" : userIDToRegister);
+                userIDToRegister = "";
+                break;
+              case EResponse::LOGIN_USER:
+                client.print(userIDToLogin == ""? "None" : userIDToLogin);
+                userIDToLogin = "";
                 break;
               case EResponse::TEST_POST:
                 client.print("Test post request!");
@@ -79,9 +99,9 @@ WiFiClient client = server.available();   // listen for incoming clients
                 break;
             }
 
-            if (extraToWrite != "") {
-              client.print(extraToWrite);
-              extraToWrite = "";
+            if (extraToPrint != "") {
+              client.print(extraToPrint);
+              extraToPrint = "";
             }
 
             // The HTTP response ends with another blank line:
@@ -105,6 +125,11 @@ WiFiClient client = server.available();   // listen for incoming clients
         if (currentLine.endsWith("POST /test")) {
           eResponse = EResponse::TEST_POST;
         }
+        if (currentLine.endsWith("POST /openDoor")) {
+          eResponse = EResponse::OPEN_DOOR;
+        } else if (currentLine.endsWith("POST /closeDoor")) {
+          eResponse = EResponse::CLOSE_DOOR;
+        }
         if (currentLine.indexOf("POST /register/") != -1) { // If string contains substring.
           eResponse = EResponse::REGISTER_USER;
 
@@ -121,7 +146,29 @@ WiFiClient client = server.available();   // listen for incoming clients
 
           subString.trim();
 
-          extraToWrite = "To register user: " + subString;
+          userIDToRegister = subString;
+
+          extraToPrint = "To register user: " + subString;
+        }
+        if (currentLine.indexOf("POST /login/") != -1) {
+          eResponse = EResponse::LOGIN_USER;
+          
+          String prefix = "POST /login/";
+          int startingIndex = currentLine.indexOf(prefix);
+          int endingIndex = currentLine.indexOf("HTTP/1.1");
+          
+          String subString;
+
+          if (endingIndex != -1) {
+            subString = currentLine.substring(startingIndex + prefix.length(), endingIndex);
+          } else {
+            subString = currentLine.substring(startingIndex + prefix.length());
+          }    
+
+          subString.trim();
+          userIDToLogin = subString;
+
+          extraToPrint = "To Login user: " + subString;
         }
       }
     }
