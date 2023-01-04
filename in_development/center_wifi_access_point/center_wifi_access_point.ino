@@ -67,6 +67,7 @@ WiFiClient client = server.available();   // listen for incoming clients
                 client.print(doorShouldOpen? "Open" : "Close");
                 break;
               case EResponse::REGISTER_USER:
+                client.print("TODO: Implement user registering.");              
                 break;
               case EResponse::TEST_POST:
                 client.print("Test post request!");
@@ -96,7 +97,10 @@ WiFiClient client = server.available();   // listen for incoming clients
         }
         if (currentLine.endsWith("POST /test")) {
           eResponse = EResponse::TEST_POST;
-        } 
+        }
+        if (currentLine.indexOf("POST /register/") != -1) { // If string contains substring.
+          eResponse = EResponse::REGISTER_USER;
+        }
       }
     }
     // close the connection:
