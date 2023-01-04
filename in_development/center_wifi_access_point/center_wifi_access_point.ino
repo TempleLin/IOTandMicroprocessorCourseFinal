@@ -8,11 +8,19 @@ const char *password = "meeting1234";
 
 WiFiServer server(80);
 
+enum class EResponse {
+  SHOW_DOOR_STATUS,
+  REGISTER_USER,
+  TEST_POST,
+  NONE
+};
+
 /*
 Attributes that could change when receiving desired requests.
 */
-bool showIsDoorOpen = false;
 bool doorShouldOpen = false;
+
+EResponse eResponse = EResponse::SHOW_DOOR_STATUS;
 
 void setup() {
   Serial.begin(9600);
@@ -54,10 +62,18 @@ WiFiClient client = server.available();   // listen for incoming clients
             client.println("Content-type:text/html");
             client.println();
 
-            if (showIsDoorOpen) {
-              client.print(doorShouldOpen? "Open" : "Close");
-            } else {
-              client.print("Send some requests!");              
+            switch (eResponse) {
+              case EResponse::SHOW_DOOR_STATUS:
+                client.print(doorShouldOpen? "Open" : "Close");
+                break;
+              case EResponse::REGISTER_USER:
+                break;
+              case EResponse::TEST_POST:
+                client.print("Test post request!");
+                break;
+              case EResponse::NONE:
+                client.print("Send some requests!");
+                break;
             }
 
             // The HTTP response ends with another blank line:
@@ -73,10 +89,14 @@ WiFiClient client = server.available();   // listen for incoming clients
 
         // Check to see if the client request was "GET /canDoorOpen".
         if (currentLine.endsWith("GET /canDoorOpen")) {
-          showIsDoorOpen = true;
-        } else if (currentLine.endsWith("GET /")){
-          showIsDoorOpen = false;
+          eResponse = EResponse::SHOW_DOOR_STATUS;
+        } 
+        if (currentLine.endsWith("GET /")){
+          eResponse = EResponse::NONE;
         }
+        if (currentLine.endsWith("POST /test")) {
+          eResponse = EResponse::TEST_POST;
+        } 
       }
     }
     // close the connection:
