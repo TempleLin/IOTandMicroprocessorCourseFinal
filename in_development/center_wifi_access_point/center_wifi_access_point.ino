@@ -109,8 +109,17 @@ WiFiClient client = server.available();   // listen for incoming clients
           eResponse = EResponse::REGISTER_USER;
 
           String prefix = "POST /register/";
-          int index = currentLine.indexOf(prefix);
-          String subString = currentLine.substring(index + prefix.length()); // Get substring from after prefix index all the way to the end.
+          int startingIndex = currentLine.indexOf(prefix);
+          int endingIndex = currentLine.indexOf("HTTP/1.1"); // POST request might end with "HTTP/1.1".
+          
+          String subString;
+          if (endingIndex != -1) {
+            subString = currentLine.substring(startingIndex + prefix.length(), endingIndex);
+          } else {
+            subString = currentLine.substring(startingIndex + prefix.length()); // Get substring from after prefix index all the way to the end.
+          }
+
+          subString.trim();
 
           extraToWrite = "To register user: " + subString;
         }
