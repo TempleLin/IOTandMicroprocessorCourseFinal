@@ -17,3 +17,5 @@ Note:
         "A fatal error occurred: Failed to connect to ESP32: Wrong boot mode detected (0x13)!"
 
     You can fix by: Just press BOOT button on the board while uploading.
+
+    Also, it seems that selecting "ESP32C3 Dev Module" is better and more stable than "ESP32 Dev Module" when choosing to upload the code.
