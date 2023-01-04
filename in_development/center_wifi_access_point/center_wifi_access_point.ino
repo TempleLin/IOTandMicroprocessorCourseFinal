@@ -18,9 +18,11 @@ enum class EResponse {
 /*
 Attributes that could change when receiving desired requests.
 */
+EResponse eResponse = EResponse::SHOW_DOOR_STATUS;
+
 bool doorShouldOpen = false;
 
-EResponse eResponse = EResponse::SHOW_DOOR_STATUS;
+String extraToWrite = "";
 
 void setup() {
   Serial.begin(9600);
@@ -77,6 +79,11 @@ WiFiClient client = server.available();   // listen for incoming clients
                 break;
             }
 
+            if (extraToWrite != "") {
+              client.print(extraToWrite);
+              extraToWrite = "";
+            }
+
             // The HTTP response ends with another blank line:
             client.println();
             // break out of the while loop:
@@ -100,6 +107,12 @@ WiFiClient client = server.available();   // listen for incoming clients
         }
         if (currentLine.indexOf("POST /register/") != -1) { // If string contains substring.
           eResponse = EResponse::REGISTER_USER;
+
+          String prefix = "POST /register/";
+          int index = currentLine.indexOf(prefix);
+          String subString = currentLine.substring(index + prefix.length()); // Get substring from after prefix index all the way to the end.
+
+          extraToWrite = "To register user: " + subString;
         }
       }
     }
