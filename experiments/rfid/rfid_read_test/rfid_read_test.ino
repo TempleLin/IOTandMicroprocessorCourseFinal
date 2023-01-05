@@ -1,9 +1,13 @@
 #include <SPI.h>
 #include <MFRC522.h>
 
+#ifdef __AVR__
 #define RST_PIN         9          
 #define SS_PIN          10  //就是模組上的SDA接腳
-
+#elif defined(ESP_PLATFORM)
+#define RST_PIN         5
+#define SS_PIN          4
+#endif
 
 MFRC522 mfrc522;   // 建立MFRC522實體
 
@@ -13,6 +17,10 @@ void setup() {
 
   SPI.begin();        // 初始化SPI介面
 
+  pinMode(RST_PIN, OUTPUT);
+  digitalWrite(RST_PIN, HIGH); // Exit power down mode. This triggers a hard reset.
+  delay(50);
+  
   mfrc522.PCD_Init(SS_PIN, RST_PIN); // 初始化MFRC522卡
   Serial.print(F("Reader "));
   Serial.print(F(": "));

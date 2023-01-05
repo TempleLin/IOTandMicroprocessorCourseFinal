@@ -1,5 +1,5 @@
-#include <Key.h>
-#include <Keypad.h>
+// #include <Key.h>
+// #include <Keypad.h>
 
 /*
 Make sure to comment out the macros if its relevant functionality is not setup hardware-wise.
@@ -76,7 +76,7 @@ Pins for ESP32 SPI:
 - SCK: IO18
 */
 const uint8_t ssPin = 5; // SDA
-const uint8_t rstPin = 16; // RST
+const uint8_t rstPin = 4; // RST
 
 #elif defined(__AVR__)
 const uint8_t ssPin = 9;
@@ -91,7 +91,7 @@ void setup() {
   Serial.println("Setup.");  
 
 #ifdef USE_RFID
-  SPI.begin(); // This is needed for setting up RFID reading.
+  SPI.begin(18, 19, 23, 5); // This is needed for setting up RFID reading.
   mfrc522 = setupMFRC522(ssPin, rstPin, RFID_SERIAL);
 #endif
 
