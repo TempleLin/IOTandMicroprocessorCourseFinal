@@ -7,24 +7,34 @@ Comment this if the MCU used is Arduino instead of ESP32.
 Make sure to comment out the macros if its relevant functionality is not setup hardware-wise.
 */
 #ifdef USING_ESP32
-  #define USE_NETWORKING
+  // #define USE_NETWORKING
 #endif
-#define USE_KEYPAD 
+#define USE_KEYPAD
+#define USE_UART_PICO_RFID
 
+/*
+--- INCLUDES START ---
+*/
+#ifdef USE_KEYPAD
 #include <Keypad.h>
 #include "keypad_config_data.h"
+#include "stack.h"
+#endif
 
 #ifdef USE_NETWORKING
 #include "networking_control.h"
 #endif
 
-#include "stack.h"
+#ifdef USE_UART_PICO_RFID
+#include "HardwareSerial.h"
+#endif
+/*
+--- INCLUDES END ---
+*/
 
-#define USER_KEY_INPUTS_MAX 5
-
-
-const static bool NETWORKING_SERIAL = true;
-
+/*
+--- GLOBAL VARS START ---
+*/
 #ifdef USING_ESP32 
 /*
 Be aware: GPIO 34~39 in ESP32 are INPUT ONLY. Therefore, they cannot be used to connect to keypad.
@@ -36,22 +46,41 @@ const byte rowPins[] {9, 8, 7, 6};
 const byte colPins[] {5, 4, 3, 2};
 #endif
 
-const char keypadRegisterPassword[] = {'A', '1', '2', '3', '4'}; // userInputs data must match this array in order to register new user(RFID) to database.
 
+#ifdef USE_KEYPAD
+const int USER_KEY_INPUTS_MAX = 5;
+const char keypadRegisterPassword[] = {'A', '1', '2', '3', '4'}; // userInputs data must match this array in order to register new user(RFID) to database.
 // Create the Keypad
 Keypad keypad = Keypad(makeKeymap(keys), const_cast<byte*>(rowPins), const_cast<byte*>(colPins), ROWS, COLS);
 Stack userInputs{}; // Keypad inputs get added to stack.
+#endif
 
 #ifdef USE_NETWORKING
+const static bool NETWORKING_SERIAL = true; // Log out stuffs in networking_control.h.
 WiFiClient* client;
 const char* wifiSSID = "Galaxy A53 5GDC0F";
 const char* wifiPass = "bcvs5702";
 const char* server = "www.google.com";
 #endif
 
+#ifdef USE_UART_PICO_RFID
+const static int UART2DATA_LEN = 10;
+HardwareSerial serial2(2); // Use "UART2" in ESP32.
+uint8_t uart2Data[UART2DATA_LEN];
+String lastScannedRFID = "";
+#endif
+/*
+--- GLOBAL VARS END ---
+*/
+
+
 void setup() {
   Serial.begin(9600);
   Serial.println("Setup.");  
+
+#ifdef USE_UART_PICO_RFID
+  serial2.begin(115200);
+#endif
 
 #ifdef USE_KEYPAD
   userInputs.top = nullptr;
@@ -69,6 +98,18 @@ void loop() {
   // Serial.println("Loop.");
   static long previousMillis = 0; // Milliseconds for counting timer.
   unsigned long currentMillis = millis();
+
+#ifdef USE_UART_PICO_RFID
+int readBytes = serial2.readBytes(uart2Data, 10);
+if (readBytes > 0) {
+  lastScannedRFID = "";
+  for (int i = 0; i < UART2DATA_LEN; i++) {
+    lastScannedRFID += (char)uart2Data[i];
+    // Serial.print((char)uart2Data[i]);
+  }
+  Serial.println("Scanned RFID: " + lastScannedRFID);
+}
+#endif
 
 #ifdef USE_KEYPAD
   char key = keypad.getKey();
@@ -118,6 +159,7 @@ void loop() {
 // Serial.println("Loop finish.");
 }
 
+#ifdef USE_KEYPAD
 void onKeypadRegisterPasswordMatch() {
   Serial.println("Keypad register password match.");
   Serial.print("Length of userInput: ");
@@ -128,3 +170,4 @@ void onIdleTimerReached() {
   Serial.println("Idle reached. Clearing");
   Clear(&userInputs);
 }
+#endif

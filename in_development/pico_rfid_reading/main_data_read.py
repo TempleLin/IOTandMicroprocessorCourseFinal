@@ -1,6 +1,7 @@
 from mfrc522 import MFRC522
 import utime
 import time
+from machine import UART, Pin
 
 """
 GND - GND
@@ -12,6 +13,7 @@ GP4 - MISO
 GP22 - RST
 """
 reader = MFRC522(spi_id=0, sck=6, miso=4, mosi=7, cs=5, rst=22)
+uart0 = UART(0, baudrate=115200, tx=Pin(0), rx=Pin(1))  # Use GP0 and GP1 for UART0.
 
 RFID_BUFFER_CLEAN = 3000  # Refresh last scanned RFID every 3 seconds (3000 milliseconds).
 
@@ -38,6 +40,7 @@ def main():
                 if last_scanned_id == "":
                     print("CARD ID: " + str(card))
                     last_scanned_id = str(card)
+                    uart0.write(last_scanned_id)
         utime.sleep_ms(500)
 
 
