@@ -7,7 +7,7 @@ Comment this if the MCU used is Arduino instead of ESP32.
 Make sure to comment out the macros if its relevant functionality is not setup hardware-wise.
 */
 #ifdef USING_ESP32
-  // #define USE_NETWORKING
+  #define USE_NETWORKING
 #endif
 #define USE_KEYPAD
 #define USE_UART_PICO_RFID
