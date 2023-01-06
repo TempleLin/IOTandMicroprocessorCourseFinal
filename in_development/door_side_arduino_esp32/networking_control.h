@@ -1,3 +1,4 @@
+#include "WiFiClient.h"
 #ifndef WIFI_CTRL
 #define WIFI_CTRL
 
@@ -5,6 +6,7 @@
 
 // From WIFI library: https://www.arduino.cc/reference/en/libraries/wifi/
 #include <WiFi.h>
+#include <HTTPClient.h>
 
 void printWifiStatus();
 
@@ -65,21 +67,21 @@ void connectToWiFi(const char* ssid, const char* password, bool serialEnabled) {
   }
 }
 
-WiFiClient* connectToServer(const char* server, bool serialEnabled) {
-  WiFiClient* client = new WiFiClient();
-  if (client->connect(server, 80)) {
-    if (serialEnabled) {
-      Serial.println("connected to server");
-      // Make a HTTP request:
-      client->println("GET /search?q=arduino HTTP/1.1");
-      client->print("Host: ");
-      client->println(server);
-      client->println("Connection: close");
-      client->println();
-    }
-  }
-  return client;
-}
+// WiFiClient* connectToServer(const char* server, bool serialEnabled) {
+//   WiFiClient* client = new WiFiClient();
+//   if (client->connect(server, 80)) {
+//     if (serialEnabled) {
+//       Serial.println("connected to server");
+//       // // Make a HTTP request:
+//       // client->println("GET /search?q=arduino HTTP/1.1");
+//       // client->print("Host: ");
+//       // client->println(server);
+//       // client->println("Connection: close");
+//       // client->println();
+//     }
+//   }
+//   return client;
+// }
 
 void printWifiStatus() {
   // print the SSID of the network you're attached to:
@@ -88,7 +90,7 @@ void printWifiStatus() {
 
   // print your WiFi shield's IP address:
   IPAddress ip = WiFi.localIP();
-  Serial.print("IP Address: ");
+  Serial.print("IP Address: "); // Possibly 192.168.4.1 by default.
   Serial.println(ip);
 
   // print the received signal strength:
@@ -96,6 +98,24 @@ void printWifiStatus() {
   Serial.print("signal strength (RSSI):");
   Serial.print(rssi);
   Serial.println(" dBm");
+}
+
+void loginRFIDToServer(char* serverName, String rfid) {
+  if (WiFi.status() == WL_CONNECTED) {
+    WiFiClient client;
+    HTTPClient http;
+    // Your Domain name with URL path or IP address with path
+    http.begin(client, String(serverName) + "login/" + rfid);    
+    
+    http.addHeader("Content-Type", "text/plain");
+    int httpResponseCode = http.POST("");
+
+    Serial.print("HTTP Response code: ");
+    Serial.println(httpResponseCode);
+        
+    // Free resources
+    http.end();
+  }
 }
 
 #endif

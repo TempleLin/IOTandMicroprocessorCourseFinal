@@ -49,7 +49,7 @@ Researched WiFi server code examples:
 */
 
 void loop() {
-WiFiClient client = server.available();   // listen for incoming clients
+  WiFiClient client = server.available();   // listen for incoming clients
 
   if (client) {                             // if you get a client,
     Serial.println("New Client.");           // print a message out the serial port
@@ -100,6 +100,7 @@ WiFiClient client = server.available();   // listen for incoming clients
             }
 
             if (extraToPrint != "") {
+              Serial.println("extraToPrint: " + extraToPrint);
               client.print(extraToPrint);
               extraToPrint = "";
             }
@@ -114,6 +115,10 @@ WiFiClient client = server.available();   // listen for incoming clients
         } else if (c != '\r') {  // if you got anything else but a carriage return character,
           currentLine += c;      // add it to the end of the currentLine
         }
+
+        // if (currentLine != "") {
+        //   Serial.println("Content: " + currentLine);
+        // }
 
         // Check to see if the client request was "GET /canDoorOpen".
         if (currentLine.endsWith("GET /canDoorOpen")) {

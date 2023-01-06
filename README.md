@@ -14,3 +14,8 @@ Current architecture planning draft:
 
 <h1>UPDATE: Everything above are OUTDATED.</h1>
 <h3>A new architecture is being planned. There will be a center ESP32 used as access point(router) for all other circuits to make communications with each other.</h3>
+
+TODO:
+
+- The current approach of sending POST from client to server is through URL. But that's extremely bad and makes POST request pointless. This should be re-designed once the project's first version is complete.
+Example link of how to change it to correct way: https://randomnerdtutorials.com/esp8266-nodemcu-http-get-post-arduino/

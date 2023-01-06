@@ -57,10 +57,9 @@ Stack userInputs{}; // Keypad inputs get added to stack.
 
 #ifdef USE_NETWORKING
 const static bool NETWORKING_SERIAL = true; // Log out stuffs in networking_control.h.
-WiFiClient* client;
-const char* wifiSSID = "Galaxy A53 5GDC0F";
-const char* wifiPass = "bcvs5702";
-const char* server = "www.google.com";
+const char* wifiSSID = "MeetingIOTCtrl";
+const char* wifiPass = "meeting1234";
+const char* server = "http://192.168.4.1/";
 #endif
 
 #ifdef USE_UART_PICO_RFID
@@ -90,7 +89,6 @@ void setup() {
 #ifdef USE_NETWORKING
     scanNearbyWiFi();
     connectToWiFi(wifiSSID, wifiPass, NETWORKING_SERIAL);
-    client = connectToServer(server, NETWORKING_SERIAL);
 #endif
 }
 
@@ -108,6 +106,9 @@ if (readBytes > 0) {
     // Serial.print((char)uart2Data[i]);
   }
   Serial.println("Scanned RFID: " + lastScannedRFID);
+#ifdef USE_NETWORKING
+  loginRFIDToServer(const_cast<char*>(server), lastScannedRFID);
+#endif
 }
 #endif
 
@@ -141,22 +142,8 @@ if (readBytes > 0) {
 #endif
 
 #ifdef USE_NETWORKING
-  // while (client->available()) { // If this loop keeps going, keypad won't be able to work.
-  //   // char c = client->read();
-  //   // Serial.write(c);
-  // }
 
-  // if the server's disconnected, stop the client:
-  if (!client->connected()) {
-    Serial.println();
-    Serial.println("disconnecting from server.");
-    client->stop();
-
-    // do nothing forevermore:
-    while (true);
-  }
 #endif
-// Serial.println("Loop finish.");
 }
 
 #ifdef USE_KEYPAD
