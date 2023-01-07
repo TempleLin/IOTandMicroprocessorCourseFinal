@@ -15,7 +15,6 @@ const dbTableRFIDColName = "rfid";
 let appDAO;
 
 const findLoginUser = () => {
-    // Get last login from ESP32 if exists.
     httpGet(serverName + findLoginRoute, (chunk) => {
         chunk = chunk.trim();
         if (chunk !== "None") {
@@ -33,7 +32,6 @@ const findLoginUser = () => {
 }
 
 const findRegisterUser = () => {
-    // Get last register from ESP32 if exists.
     httpGet(serverName + findRegisterRoute, (chunk) => {
         chunk = chunk.trim();
         if (chunk !== "None") {
@@ -47,6 +45,11 @@ const findRegisterUser = () => {
     });
 };
 
+const intervalActions = () => {
+    findLoginUser();
+    findRegisterUser();
+}
+
 (async function main() {
     if (!fs.existsSync(dbDirPath)) {
         fs.mkdirSync(dbDirPath);
@@ -57,6 +60,6 @@ const findRegisterUser = () => {
                 "id INTEGER PRIMARY KEY AUTOINCREMENT",
                 `${dbTableRFIDColName} VARCHAR(100)`
             ]);
-    setInterval(findLoginUser, intervalPeriod);
-    setInterval(findRegisterUser, intervalPeriod * 2);
+
+    setInterval(intervalActions, intervalPeriod);
 })();
