@@ -2,6 +2,8 @@
 #include <WiFiClient.h>
 #include <WiFiAP.h>
 
+String getTrimmedSubString(String currentLine, String prefixToIgnore, String postfixToIgnore = "HTTP/1.1");
+
 // Set these to your desired credentials.
 const char *ssid = "MeetingIOTCtrl";
 const char *password = "meeting1234";
@@ -121,59 +123,30 @@ void loop() {
         // }
 
         // Check to see if the client request was "GET /canDoorOpen".
-        if (currentLine.endsWith("GET /canDoorOpen")) {
+        if (currentLine.indexOf("GET /canDoorOpen") != -1) {
           eResponse = EResponse::SHOW_DOOR_STATUS;
-        } 
-        if (currentLine.endsWith("GET /")){
+        } else if (currentLine.indexOf("GET /") != -1){ // Make sure GET / will be the last possible option of GET requests.
           eResponse = EResponse::NONE;
-        }
-        if (currentLine.endsWith("POST /test")) {
+        } else if (currentLine.indexOf("POST /test") != -1) {
           eResponse = EResponse::TEST_POST;
-        }
-        if (currentLine.endsWith("POST /openDoor")) {
+        } else if (currentLine.indexOf("POST /openDoor") != -1) {
           eResponse = EResponse::OPEN_DOOR;
-        } else if (currentLine.endsWith("POST /closeDoor")) {
+        } else if (currentLine.indexOf("POST /closeDoor") != -1) {
           eResponse = EResponse::CLOSE_DOOR;
-        }
-        if (currentLine.indexOf("POST /register/") != -1) { // If string contains substring.
+        } else if (currentLine.indexOf("POST /register/") != -1) { // If string contains substring.
           eResponse = EResponse::REGISTER_USER;
 
-          String prefix = "POST /register/";
-          int startingIndex = currentLine.indexOf(prefix);
-          int endingIndex = currentLine.indexOf("HTTP/1.1"); // POST request might end with "HTTP/1.1".
-          
-          String subString;
-          if (endingIndex != -1) {
-            subString = currentLine.substring(startingIndex + prefix.length(), endingIndex);
-          } else {
-            subString = currentLine.substring(startingIndex + prefix.length()); // Get substring from after prefix index all the way to the end.
-          }
+          String prefixToIgnore = "POST /register/";
+          userIDToRegister = getTrimmedSubString(currentLine, prefixToIgnore);
 
-          subString.trim();
-
-          userIDToRegister = subString;
-
-          extraToPrint = "To register user: " + subString;
-        }
-        if (currentLine.indexOf("POST /login/") != -1) {
+          extraToPrint = "To register user: " + userIDToRegister;
+        } else if (currentLine.indexOf("POST /login/") != -1) {
           eResponse = EResponse::LOGIN_USER;
           
-          String prefix = "POST /login/";
-          int startingIndex = currentLine.indexOf(prefix);
-          int endingIndex = currentLine.indexOf("HTTP/1.1");
-          
-          String subString;
+          String prefixToIgnore = "POST /login/";
+          userIDToLogin = getTrimmedSubString(currentLine, prefixToIgnore);
 
-          if (endingIndex != -1) {
-            subString = currentLine.substring(startingIndex + prefix.length(), endingIndex);
-          } else {
-            subString = currentLine.substring(startingIndex + prefix.length());
-          }    
-
-          subString.trim();
-          userIDToLogin = subString;
-
-          extraToPrint = "To Login user: " + subString;
+          extraToPrint = "To Login user: " + userIDToLogin;
         }
       }
     }
@@ -181,4 +154,22 @@ void loop() {
     client.stop();
     Serial.println("Client Disconnected.");
   }
+}
+
+/**
+  * @param prefixToIgnore Prefix string to not get included in the substring. EX. "POST /login/"
+  * @param postfixToIgnore Postfix string to not get included in the substring. EX. "HTTP/1.1". Default value is "HTTP/1.1", declared above.
+  */
+String getTrimmedSubString(String currentLine, String prefixToIgnore, String postfixToIgnore) {
+  int startingIndex = currentLine.indexOf(prefixToIgnore);
+  int endingIndex = currentLine.indexOf(postfixToIgnore);
+
+  String subString;
+  if (endingIndex != -1) {
+    subString = currentLine.substring(startingIndex + prefixToIgnore.length(), endingIndex);
+  } else {
+    subString = currentLine.substring(startingIndex + prefixToIgnore.length());
+  }    
+  subString.trim();
+  return subString;
 }
