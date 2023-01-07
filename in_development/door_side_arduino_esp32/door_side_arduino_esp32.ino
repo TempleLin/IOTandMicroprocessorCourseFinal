@@ -48,7 +48,6 @@ const char keypadRegisterPassword[] = {'A', '1', '2', '3', '4'}; // userInputs d
 // Create the Keypad
 Keypad keypad = Keypad(makeKeymap(keys), const_cast<byte*>(rowPins), const_cast<byte*>(colPins), ROWS, COLS);
 Stack userInputs{}; // Keypad inputs get added to stack.
-bool inputtingKeypad = false; // This can prevent UART reading from blocking the keypad input events.
 #endif
 
 #ifdef USE_NETWORKING
@@ -95,9 +94,9 @@ void loop() {
   unsigned long currentMillis = millis();
 
 #ifdef USE_UART_PICO_RFID
-  if (!inputtingKeypad) {
-    int readBytes = serial2.readBytes(uart2Data, 10);
-    if (readBytes > 0) {
+    // .readBytes() blocks process until timeout. This will cause some keypad inputs to be missed out. Using .read() is better under these circumstances.
+  int readBytes = serial2.read(uart2Data, 10);
+  if (readBytes > 0) {
     lastScannedRFID = "";
     for (int i = 0; i < UART2DATA_LEN; i++) {
       lastScannedRFID += (char)uart2Data[i];
@@ -112,14 +111,12 @@ void loop() {
     }
 #endif
   }
-}
 #endif
 
 #ifdef USE_KEYPAD
   char key = keypad.getKey();
 
   if (key != NO_KEY) {
-    inputtingKeypad = true;
     previousMillis = currentMillis; // Reset timer if key input happens.
     Serial.print("User input appending: ");
     Serial.println(key);
@@ -156,13 +153,11 @@ void onKeypadRegisterPasswordMatch() {
   Serial.print("Length of userInput: ");
   Serial.println(Length(&userInputs));
   useRFIDForLogin = false;
-  inputtingKeypad = false;
 }
 
 void onIdleTimerReached() {
   Serial.println("Idle reached. Clearing");
   Clear(&userInputs);
   useRFIDForLogin = true;
-  inputtingKeypad = false;
 }
 #endif
