@@ -1,4 +1,3 @@
-const http = require('http');
 const {httpGet} = require("./http_ctrl");
 
 const serverName = "http://192.168.4.1";
