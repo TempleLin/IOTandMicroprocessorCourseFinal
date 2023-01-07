@@ -19,3 +19,9 @@ TODO:
 
 - The current approach of sending POST from client to server is through URL. But that's extremely bad and makes POST request pointless. This should be re-designed once the project's first version is complete.
 Example link of how to change it to correct way: https://randomnerdtutorials.com/esp8266-nodemcu-http-get-post-arduino/
+
+Contributors:
+
+- 1092046 林天牧
+- 1092060 林俊廷 
+- 1083814 劉彥均
