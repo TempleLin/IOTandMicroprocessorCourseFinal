@@ -15,9 +15,9 @@ enum class EResponse {
   OPEN_DOOR, // From Raspberry Pi 4B.
   CLOSE_DOOR, // From Raspberry Pi 4B.
   REGISTER_USER, // From ESP32.
-  GET_REGISTER_USER, // From Raspberry Pi 4B.  
+  GET_REGISTER_USER, // From Raspberry Pi 4B. This state will return last input user ID from ESP32 (Happens at REGISTER_USER) to register if exists.
   LOGIN_USER, // From ESP32.
-  GET_LOGIN_USER, // From Raspberry Pi 4B.  
+  GET_LOGIN_USER, // From Raspberry Pi 4B. This state will return last input user ID from ESP32 (Happens at LOGIN_USER) to login if exists.
   TEST_POST,
   NONE
 };
@@ -90,6 +90,10 @@ void loop() {
                 userIDToRegister = "";
                 break;
               case EResponse::LOGIN_USER:
+                // client.print(userIDToLogin == ""? "None" : userIDToLogin);
+                // userIDToLogin = "";
+                break;
+              case EResponse::GET_LOGIN_USER:
                 client.print(userIDToLogin == ""? "None" : userIDToLogin);
                 userIDToLogin = "";
                 break;
@@ -118,20 +122,20 @@ void loop() {
           currentLine += c;      // add it to the end of the currentLine
         }
 
-        // if (currentLine != "") {
-        //   Serial.println("Content: " + currentLine);
-        // }
-
         // Check to see if the client request was "GET /canDoorOpen".
-        if (currentLine.indexOf("GET /canDoorOpen") != -1) {
+        if (currentLine.indexOf("GET /canDoorOpen/") != -1) {
           eResponse = EResponse::SHOW_DOOR_STATUS;
+        } else if (currentLine.indexOf("GET /last_register/") != -1) {
+          eResponse = EResponse::GET_REGISTER_USER;
+        } else if (currentLine.indexOf("GET /last_login/") != -1) {
+          eResponse = EResponse::GET_LOGIN_USER;
         } else if (currentLine.indexOf("GET /") != -1){ // Make sure GET / will be the last possible option of GET requests.
           eResponse = EResponse::NONE;
-        } else if (currentLine.indexOf("POST /test") != -1) {
+        } else if (currentLine.indexOf("POST /test/") != -1) {
           eResponse = EResponse::TEST_POST;
-        } else if (currentLine.indexOf("POST /openDoor") != -1) {
+        } else if (currentLine.indexOf("POST /openDoor/") != -1) {
           eResponse = EResponse::OPEN_DOOR;
-        } else if (currentLine.indexOf("POST /closeDoor") != -1) {
+        } else if (currentLine.indexOf("POST /closeDoor/") != -1) {
           eResponse = EResponse::CLOSE_DOOR;
         } else if (currentLine.indexOf("POST /register/") != -1) { // If string contains substring.
           eResponse = EResponse::REGISTER_USER;
