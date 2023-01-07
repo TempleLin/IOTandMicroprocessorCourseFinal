@@ -17,7 +17,7 @@ let appDAO;
 const findLoginUser = () => {
     httpGet(serverName + findLoginRoute, (chunk) => {
         chunk = chunk.trim();
-        if (chunk !== "None" && chunk !== undefined) {
+        if (chunk !== "None" && chunk !== undefined && chunk !== null && chunk !== '') {
             console.log(`Last login input from ESP32: ${chunk}`);
             appDAO.getWhere(dbTableRFIDColName, chunk)
                 .then(r => {
@@ -34,7 +34,7 @@ const findLoginUser = () => {
 const findRegisterUser = () => {
     httpGet(serverName + findRegisterRoute, (chunk) => {
         chunk = chunk.trim();
-        if (chunk !== "None" && chunk !== undefined) {
+        if (chunk !== "None" && chunk !== undefined && chunk !== null && chunk !== '') {
             console.log(`Last register input from ESP32: ${chunk}`);
             appDAO.insertIfNotExists(dbTableRFIDColName, [chunk]).then(r => {
                     console.log(`Registered successful: ${r}`);
