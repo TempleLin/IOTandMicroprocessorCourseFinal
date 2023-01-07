@@ -12,7 +12,7 @@ Current architecture planning draft:
 
 ![Architecture Image](./architecture_ugly_img.jpg)
 
-<h1>UPDATE: Everything above are OUTDATED.</h1>
+<h1>UPDATE: Everything above is OUTDATED.</h1>
 <h3>A new architecture is being planned. There will be a center ESP32 used as access point(router) for all other circuits to make communications with each other.</h3>
 
 TODO:
