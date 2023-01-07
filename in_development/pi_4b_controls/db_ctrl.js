@@ -1,6 +1,6 @@
 const sqlite3 = require('sqlite3');
 
-class AppDAO {
+class DB_Ctrl {
     constructor(dbFilePath) {
         this.db = new sqlite3.Database(dbFilePath, (err) => {
             if (err) {
@@ -78,4 +78,4 @@ class AppDAO {
     // }
 }
 
-module.exports = AppDAO;
+module.exports = DB_Ctrl;
