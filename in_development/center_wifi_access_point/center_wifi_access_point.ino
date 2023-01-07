@@ -126,6 +126,7 @@ void loop() {
         if (currentLine.indexOf("GET /canDoorOpen/") != -1) {
           eResponse = EResponse::SHOW_DOOR_STATUS;
         } else if (currentLine.indexOf("GET /last_register/") != -1) {
+          // Serial.println("GET /last_register/ found.");
           eResponse = EResponse::GET_REGISTER_USER;
         } else if (currentLine.indexOf("GET /last_login/") != -1) {
           eResponse = EResponse::GET_LOGIN_USER;

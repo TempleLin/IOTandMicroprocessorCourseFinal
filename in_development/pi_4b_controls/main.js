@@ -5,7 +5,7 @@ const path = require("path");
 
 const serverName = "http://192.168.4.1";
 const findLoginRoute = "/last_login/";
-const findRegisterRoute = "/last_register";
+const findRegisterRoute = "/last_register/";
 const intervalPeriod = 1000; // Trigger callback every 1000 milliseconds interval.
 
 const dbDirPath = "./db";
@@ -14,12 +14,12 @@ const dbTableRFIDColName = "rfid";
 
 let appDAO;
 
-const intervalActions = () => {
+const findLoginUser = () => {
     // Get last login from ESP32 if exists.
     httpGet(serverName + findLoginRoute, (chunk) => {
         chunk = chunk.trim();
         if (chunk !== "None") {
-            console.log(`Last login from ESP32: ${chunk}`);
+            console.log(`Last login input from ESP32: ${chunk}`);
             appDAO.getWhere(dbTableRFIDColName, chunk)
                 .then(r => {
                     if (r !== undefined) {
@@ -30,11 +30,13 @@ const intervalActions = () => {
                 });
         }
     });
+}
 
+const findRegisterUser = () => {
     // Get last register from ESP32 if exists.
     httpGet(serverName + findRegisterRoute, (chunk) => {
         chunk = chunk.trim();
-        if (chunk !== "None" && chunk !== undefined) {
+        if (chunk !== "None") {
             console.log(`Last register input from ESP32: ${chunk}`);
             appDAO.insertIfNotExists(dbTableRFIDColName, [chunk]).then(r => {
                     console.log(`Registered successful: ${r}`);
@@ -55,5 +57,6 @@ const intervalActions = () => {
                 "id INTEGER PRIMARY KEY AUTOINCREMENT",
                 `${dbTableRFIDColName} VARCHAR(100)`
             ]);
-    setInterval(intervalActions, intervalPeriod);
+    setInterval(findLoginUser, intervalPeriod);
+    setInterval(findRegisterUser, intervalPeriod * 2);
 })();

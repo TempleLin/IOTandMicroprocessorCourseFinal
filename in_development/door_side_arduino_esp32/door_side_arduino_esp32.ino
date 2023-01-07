@@ -48,6 +48,7 @@ const char keypadRegisterPassword[] = {'A', '1', '2', '3', '4'}; // userInputs d
 // Create the Keypad
 Keypad keypad = Keypad(makeKeymap(keys), const_cast<byte*>(rowPins), const_cast<byte*>(colPins), ROWS, COLS);
 Stack userInputs{}; // Keypad inputs get added to stack.
+bool inputtingKeypad = false; // This can prevent UART reading from blocking the keypad input events.
 #endif
 
 #ifdef USE_NETWORKING
@@ -62,6 +63,7 @@ const static int UART2DATA_LEN = 10;
 HardwareSerial serial2(2); // Use "UART2" in ESP32.
 uint8_t uart2Data[UART2DATA_LEN];
 String lastScannedRFID = "";
+bool useRFIDForLogin = true; // True for login, false for register.
 #endif
 /*
 --- GLOBAL VARS END ---
@@ -93,17 +95,23 @@ void loop() {
   unsigned long currentMillis = millis();
 
 #ifdef USE_UART_PICO_RFID
-int readBytes = serial2.readBytes(uart2Data, 10);
-if (readBytes > 0) {
-  lastScannedRFID = "";
-  for (int i = 0; i < UART2DATA_LEN; i++) {
-    lastScannedRFID += (char)uart2Data[i];
-    // Serial.print((char)uart2Data[i]);
-  }
-  Serial.println("Scanned RFID: " + lastScannedRFID);
+  if (!inputtingKeypad) {
+    int readBytes = serial2.readBytes(uart2Data, 10);
+    if (readBytes > 0) {
+    lastScannedRFID = "";
+    for (int i = 0; i < UART2DATA_LEN; i++) {
+      lastScannedRFID += (char)uart2Data[i];
+      // Serial.print((char)uart2Data[i]);
+    }
+    Serial.println("Scanned RFID: " + lastScannedRFID);
 #ifdef USE_NETWORKING
-  loginRFIDToServer(const_cast<char*>(server), lastScannedRFID);
+    if (useRFIDForLogin) {
+      loginRFIDToServer(const_cast<char*>(server), lastScannedRFID);    
+    } else {
+      registerRFIDToServer(const_cast<char*>(server), lastScannedRFID);
+    }
 #endif
+  }
 }
 #endif
 
@@ -111,6 +119,7 @@ if (readBytes > 0) {
   char key = keypad.getKey();
 
   if (key != NO_KEY) {
+    inputtingKeypad = true;
     previousMillis = currentMillis; // Reset timer if key input happens.
     Serial.print("User input appending: ");
     Serial.println(key);
@@ -146,10 +155,14 @@ void onKeypadRegisterPasswordMatch() {
   Serial.println("Keypad register password match.");
   Serial.print("Length of userInput: ");
   Serial.println(Length(&userInputs));
+  useRFIDForLogin = false;
+  inputtingKeypad = false;
 }
 
 void onIdleTimerReached() {
   Serial.println("Idle reached. Clearing");
   Clear(&userInputs);
+  useRFIDForLogin = true;
+  inputtingKeypad = false;
 }
 #endif

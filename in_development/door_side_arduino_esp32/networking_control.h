@@ -110,10 +110,27 @@ void loginRFIDToServer(char* serverName, String rfid) {
     http.addHeader("Content-Type", "text/plain");
     int httpResponseCode = http.POST("");
 
-    Serial.print("HTTP Response code: ");
+    Serial.print("loginRFIDToServer HTTP Response code: ");
     Serial.println(httpResponseCode);
         
     // Free resources
+    http.end();
+  }
+}
+
+void registerRFIDToServer(char* serverName, String rfid) {
+  if (WiFi.status() == WL_CONNECTED) {
+    WiFiClient client;
+    HTTPClient http;
+
+    http.begin(client, String(serverName) + "register/" + rfid);
+    
+    http.addHeader("Content-Type", "text/plain");
+    int httpResponseCode = http.POST("");
+
+    Serial.print("registerRFIDToServer HTTP Response code: ");
+    Serial.println(httpResponseCode);
+
     http.end();
   }
 }
