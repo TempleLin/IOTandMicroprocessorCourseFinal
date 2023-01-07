@@ -1,12 +1,7 @@
 /*
-Comment this if the MCU used is Arduino instead of ESP32.
-*/
-#define USING_ESP32
-
-/*
 Make sure to comment out the macros if its relevant functionality is not setup hardware-wise.
 */
-#ifdef USING_ESP32
+#ifdef ARDUINO_ARCH_ESP32 // Macros for identifing if the device is ESP32. (For Arduino: ARDUINO_AVR_UNO)
   #define USE_NETWORKING
 #endif
 #define USE_KEYPAD
@@ -35,7 +30,7 @@ Make sure to comment out the macros if its relevant functionality is not setup h
 /*
 --- GLOBAL VARS START ---
 */
-#ifdef USING_ESP32 
+#ifdef ARDUINO_ARCH_ESP32 
 /*
 Be aware: GPIO 34~39 in ESP32 are INPUT ONLY. Therefore, they cannot be used to connect to keypad.
 */
