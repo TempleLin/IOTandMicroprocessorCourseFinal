@@ -19,6 +19,7 @@ enum class EResponse {
   LOGIN_USER, // From ESP32.
   GET_LOGIN_USER, // From Raspberry Pi 4B. This state will return last input user ID from ESP32 (Happens at LOGIN_USER) to login if exists.
   TEST_POST,
+  DRINK, // From Windows PC YOLOv7 drink detection.
   NONE
 };
 
@@ -30,6 +31,7 @@ bool doorShouldOpen = false;
 String extraToPrint = "";
 String userIDToRegister = "";
 String userIDToLogin = "";
+bool userHasDrink = false;
 
 void setup() {
   Serial.begin(9600);
@@ -152,6 +154,19 @@ void loop() {
           userIDToLogin = getTrimmedSubString(currentLine, prefixToIgnore);
 
           extraToPrint = "To Login user: " + userIDToLogin;
+        } else if (currentLine.indexOf("POST /drinks/") != -1) {
+          eResponse = EResponse::DRINK;
+          String prefixToIgnore = "POST /drinks/";
+          String userHasDrinkStr = getTrimmedSubString(currentLine, prefixToIgnore);
+          bool _userHasDrink = userHasDrink;
+          if (userHasDrinkStr == "1") {
+            _userHasDrink = true;
+          } else if (userHasDrinkStr == "0") {
+            _userHasDrink = false;
+          }
+          if (_userHasDrink != userHasDrink) {
+            extraToPrint = "Has drink: " + userHasDrinkStr;
+          }
         }
       }
     }
