@@ -19,6 +19,7 @@
 LiquidCrystal_I2C lcd(0x27, 16, 2); //(address, width, height)
 
 String inputString = "";         // a String to hold incoming data
+
 bool stringComplete = false;  // whether the string is complete
 
 bool lastDoorStatus = false; // Close the door
@@ -56,9 +57,11 @@ void loop() {
 
     // Close the door
     if(inputString[0] == '0') {
+      lcd.clear();
       openDoor = false;
       // Open the door
     } else if (inputString[0] == '1') {
+      lcd.clear();
       openDoor = true;
     }
 
@@ -75,6 +78,11 @@ void loop() {
 
     // Remove door toggle status
     inputString.remove(0, 1);
+
+    if (inputString.charAt(inputString.length() - 1) == '\n') {
+      inputString.remove(inputString.length() - 1);
+    }
+
     // Print the msg 
     lcd.print(inputString);
     

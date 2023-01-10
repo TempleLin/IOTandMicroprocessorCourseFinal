@@ -14,7 +14,7 @@ const DB_TABLE_NAME = "rfid_registered_users";
 const DB_TABLE_RFID_COL_NAME = "rfid";
 
 // const SERIAL_PATH = '/dev/ttyS0';
-const SERIAL_PATH = 'COM11';
+const SERIAL_PATH = 'COM9';
 const SERIAL_BAUD_RATE = 9600;
 const SERIAL_ERROR_DETECT = true;
 
@@ -33,7 +33,7 @@ const findLoginUser = () => {
                         serialWrite(serialPort, '1Door Open!!\n');
                     } else {
                         console.log(`User does not exist: ${r}`);
-                        serialWrite(serialPort, '0ID Does Not Exist!!\n');
+                        serialWrite(serialPort, '0ID Not Exist!!\n');
                     }
                 });
         }
