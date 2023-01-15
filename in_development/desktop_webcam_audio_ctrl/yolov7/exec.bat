@@ -1,0 +1,1 @@
+python detect_test.py --weight drinks.pt --source 0
