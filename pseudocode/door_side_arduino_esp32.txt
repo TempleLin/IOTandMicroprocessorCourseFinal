@@ -1,0 +1,83 @@
+// Define and initialize macros and variables
+#ifdef ARDUINO_ARCH_ESP32
+#define USE_NETWORKING
+#endif
+#define USE_KEYPAD
+#define USE_UART_PICO_RFID
+
+// Include libraries and headers
+#ifdef USE_KEYPAD
+#include <Keypad.h>
+#include "keypad_config_data.h"
+#include "stack.h"
+#endif
+
+#ifdef USE_NETWORKING
+#include "networking_control.h"
+#endif
+
+#ifdef USE_UART_PICO_RFID
+#include "HardwareSerial.h"
+#endif
+
+// Global Variables
+#ifdef ARDUINO_ARCH_ESP32
+const byte rowPins[] {32, 33, 25, 26};
+const byte colPins[] {27, 14, 12, 13};
+#else
+const byte rowPins[] {9, 8, 7, 6};
+const byte colPins[] {5, 4, 3, 2};
+#endif
+
+#ifdef USE_KEYPAD
+const int USER_KEY_INPUTS_MAX = 5;
+const char keypadRegisterPassword[] = {'A', '1', '2', '3', '4'};
+Keypad keypad = Keypad(makeKeymap(keys), const_cast<byte*>(rowPins), const_cast<byte*>(colPins), ROWS, COLS);
+Stack userInputs{};
+#endif
+
+#ifdef USE_NETWORKING
+const static bool NETWORKING_SERIAL = true;
+const char* wifiSSID = "MeetingIOTCtrl";
+const char* wifiPass = "meeting1234";
+const char* server = "http://192.168.4.1/";
+#endif
+
+#ifdef USE_UART_PICO_RFID
+const static int UART2DATA_LEN = 10;
+HardwareSerial serial2(2);
+uint8_t uart2Data[UART2DATA_LEN];
+String lastScannedRFID = "";
+bool useRFIDForLogin = true;
+#endif
+
+//setup function
+initialize serial communication
+
+#ifdef USE_UART_PICO_RFID
+initialize UART communication
+#endif
+
+#ifdef USE_KEYPAD
+initialize userInputs stack
+#endif
+
+#ifdef USE_NETWORKING
+scan for nearby wifi networks
+connect to wifi network specified by wifiSSID and wifiPass
+#endif
+
+//loop function
+
+#ifdef USE_UART_PICO_RFID
+read data from UART and store in uart2Data
+update lastScannedRFID with the data read
+#endif
+
+#ifdef USE_KEYPAD
+read keypad input and add it to userInputs stack
+#endif
+
+#ifdef USE_NETWORKING
+send data to server
+#endif
