@@ -1,1 +1,1 @@
-python detect_test.py --weight drinks.pt --source 0
+python detect.py --weight drinks.pt --source 0
