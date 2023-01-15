@@ -262,5 +262,5 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
-yolov7.pt
+deprecated/yolov7.pt
 traced_model.pt

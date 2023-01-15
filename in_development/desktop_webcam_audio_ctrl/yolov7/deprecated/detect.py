@@ -14,18 +14,6 @@ from utils.general import check_img_size, check_requirements, check_imshow, non_
 from utils.plots import plot_one_box
 from utils.torch_utils import select_device, load_classifier, time_synchronized, TracedModel
 
-#-----------------------------------
-#import socket
-
-#HOST = '192.168.0.108'
-#PORT = 7711
-#-----------------------------------
-
-#-----------------------------------
-import requests
-HTTP = 'http://192.168.4.1'
-#-----------------------------------
-
 
 def detect(save_img=False):
     source, weights, view_img, save_txt, imgsz, trace = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size, not opt.no_trace
@@ -78,18 +66,7 @@ def detect(save_img=False):
     old_img_w = old_img_h = imgsz
     old_img_b = 1
 
-    #-----------Use TCP to connect server-----------
-    #T = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #T.connect((HOST, PORT))
-    #-----------------------------------------------
-
     t0 = time.time()
-
-    #-------------------------
-    t4 = time.time()
-    n = 0
-    #-------------------------
-
     for path, img, im0s, vid_cap in dataset:
         img = torch.from_numpy(img).to(device)
         img = img.half() if half else img.float()  # uint8 to fp16/32
@@ -119,8 +96,6 @@ def detect(save_img=False):
         if classify:
             pred = apply_classifier(pred, modelc, img, im0s)
 
-        
-
         # Process detections
         for i, det in enumerate(pred):  # detections per image
             if webcam:  # batch_size >= 1
@@ -132,19 +107,6 @@ def detect(save_img=False):
             save_path = str(save_dir / p.name)  # img.jpg
             txt_path = str(save_dir / 'labels' / p.stem) + ('' if dataset.mode == 'image' else f'_{frame}')  # img.txt
             gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
-
-            #-----------------------------------------
-            # t5 = time.time()
-            
-            # if (t5 - t4) > 0.250:
-            #     t4 = t5
-            #     print(str(t4) + " " + str(t5))
-            #     if n >= 1:
-            #         r = requests.post(HTTP + '/drinks/1')
-            #     else:
-            #         r = requests.post(HTTP + '/drinks/0')
-            #----------------------------------------
-
             if len(det):
                 # Rescale boxes from img_size to im0 size
                 det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
@@ -165,24 +127,6 @@ def detect(save_img=False):
                     if save_img or view_img:  # Add bbox to image
                         label = f'{names[int(cls)]} {conf:.2f}'
                         plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=1)
-
-                #---------------Transmission--------------
-                #if n >= 1: # n is how many drink are detected.
-                #    outdata = f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS'
-                #    T.send(outdata.encode())
-                #-----------------------------------------  
-
-                #-----------------------------------------
-                #t5 = time.time()
-                # print(str(t4) + " " + str(t5))
-                # if (t5 - t4) > 250:
-                #     t4 = t5
-                #     if n >= 1:
-                #         r = requests.post(HTTP + '/drinks/1')
-                #     else:
-                #         r = requests.post(HTTP + '/drinks/0')
-                #----------------------------------------
-
 
             # Print time (inference + NMS)
             print(f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
@@ -217,10 +161,6 @@ def detect(save_img=False):
         #print(f"Results saved to {save_dir}{s}")
 
     print(f'Done. ({time.time() - t0:.3f}s)')
-
-    #-------------------------------
-    #T.close()
-    #-------------------------------
 
 
 if __name__ == '__main__':
