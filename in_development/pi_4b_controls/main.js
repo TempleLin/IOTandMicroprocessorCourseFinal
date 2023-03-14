@@ -24,6 +24,9 @@ let serialPort;
 const findLoginUser = () => {
     httpGet(SERVER_NAME + FIND_LOGIN_ROUTE, (chunk) => {
         chunk = chunk.trim();
+        /*
+        This whole condition check is required, in order to make this application work on both Windows and Linux successfully.
+         */
         if (chunk !== "None" && chunk !== undefined && chunk !== null && chunk !== '') {
             console.log(`Last login input from ESP32: ${chunk}`);
             dbCtrl.getWhere(DB_TABLE_RFID_COL_NAME, chunk)
